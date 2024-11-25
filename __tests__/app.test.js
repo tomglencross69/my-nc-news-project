@@ -53,3 +53,48 @@ describe("GET /api/topics", () => {
   //write some error tests and build error functionality
 })
 });
+describe("GET /api/articles/:article_id", () => {
+  test("200: responds with an article object from parametric id request", () => {
+    return request(app)
+    .get("/api/articles/1")
+    .expect(200)
+    .then(({body : {article}})=> {
+      expect(article.article_id).toBe(1)
+    })
+  })
+  test("200: responds with article object with specific keys", () => {
+    return request(app)
+    .get("/api/articles/1")
+    .expect(200)
+    .then(({body: {article}})=> {
+      expect(article).toMatchObject({
+        author: expect.any(String),
+        title: expect.any(String),
+        article_id: expect.any(Number),
+        body: expect.any(String),
+        topic: expect.any(String),
+        created_at: expect.any(String),
+        votes: expect.any(Number),
+        article_img_url: expect.any(String)
+      })
+      console.log(JSON.stringify(article, null, 2), "article for endpoints")
+    })
+  })
+  test("400: bad request, responds with error if given an invalid article id", () => {
+    return request(app)
+    .get("/api/articles/not-valid")
+    .expect(400)
+    .then((response) => {
+      expect(response.body.msg).toBe('Bad request')
+    })
+  })
+  test('404: article not found, sends error message when given valid but non-existent id', () => {
+    return request(app)
+    .get("/api/articles/999999999")
+    .expect(404)
+    .then((response)=>{
+      expect(response.body.msg).toBe('Article not found')
+    })
+  })
+})
+
