@@ -1,7 +1,14 @@
 # Northcoders News API
+-Notes for developers
 
-For instructions, please head over to [L2C NC News](https://l2c.northcoders.com/courses/be/nc-news).
+-Environment Variables
+In order to successfully connect to both the testing and development databases locally, two new respective .env files will have to be created in the root folder.
 
+Suggested names for these files would be .env.development and .env.test.
+
+These files should contain the respective names for each of the development and test databases prefixed with PGDATABASE, ie. 'PGDATABASE=<data-base-name-here>'
+
+This will give the script in connection.js appropriate data to run either a development or testing database environment when seeding to test functionality. 
 
 
 --- 
