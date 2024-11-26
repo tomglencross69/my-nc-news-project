@@ -192,6 +192,7 @@ describe("GET /api/articles/:article_id/comments", () => {
     .expect(200)
     .then(({body})=>{
       const {comments} = body
+      console.log(comments, "<<<<comments in test")
       expect(comments).toBeSortedBy("created_at", {descending: true})
     })
   })
@@ -223,5 +224,27 @@ describe("GET /api/articles/:article_id/comments", () => {
     })
   })
 })
+describe("POST: api/articles/:article_id/comments", () => {
+  test("201: comment successfully posts to a given article", () => {
+    const newComment = {username: "Tom", body: "No comment"}
+    return request(app)
+    .post("/api/articles/1/comments")
+    .send(newComment)
+    .expect(201)
+    .then(({body})=>{
+      const {comments} = body
+      expect(comments[0]).toEqual(expect.objectContaining({
+        author: "Tom",
+        body: 'No comment'
+      }))
+    })
+  })
+})
 
-// console.log(JSON.stringify(articles, null, 2), "article for endpoints")
+
+//notes at the end of the day
+//i think the test above will return a body of an array of comment objects
+//because theyre ordered by DESC I'm hoping comments[0] will be my initial recently added comment
+//i think the only things i can expect are the author will be Tom and the body will be no comment, because the posted query will be returned from the database, which will give my comment an serial id key, automatically assign votes at 0 and created_at etc... but i dont know
+//how will username map to author? is that whats intended here? i think so
+//how will my posted body map to the body of the database comment object body?
