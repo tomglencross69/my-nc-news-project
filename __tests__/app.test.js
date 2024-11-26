@@ -213,11 +213,11 @@ describe("GET /api/articles/:article_id/comments", () => {
       expect(msg).toBe('Bad request')
     })
   })
-  test("404: not found if comments url slug is incorrect", () => {
+  test("404: page not found for incorrect comments url slug", () =>{
     return request(app)
     .get("/api/articles/1/commentsxxx")
     .expect(404)
-    .then(({body})=>{
+    .then(({body}) => {
       const {msg} = body
       expect(msg).toBe('Not available')
     })
