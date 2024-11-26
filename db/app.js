@@ -1,5 +1,5 @@
 const express = require("express")
-const {getApi, getTopics, getArticleById} = require (`${__dirname}/controllers/app.controllers.js`)
+const {getApi, getTopics, getArticleById, getArticles} = require (`${__dirname}/controllers/app.controllers.js`)
 const app = express()
 
 app.get("/api", getApi)
@@ -7,6 +7,8 @@ app.get("/api", getApi)
 app.get("/api/topics", getTopics)
 
 app.get("/api/articles/:article_id", getArticleById)
+
+app.get("/api/articles", getArticles)
 
 app.use("/*", (request, response, next) => {
     response.status(404).send({msg: "Not available"})
@@ -25,8 +27,6 @@ app.use((error, request, response, next) => {
         next(error)
     }
 })
-
-//this must be below all requests
 
 app.use((error, request, response, next) => {
     console.log(error.code, "<<<< error in 500")
