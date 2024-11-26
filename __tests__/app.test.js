@@ -135,7 +135,7 @@ describe("GET /api/articles", () => {
     .expect(200)
     .then(({body})=>{
       const {articles} = body
-      expect(articles).toBeSortedBy("created_at")
+      expect(articles).toBeSortedBy("created_at", {descending: true})
     })
   })
   test("404: endpoint not found when articles typo etc", () => {
@@ -148,6 +148,71 @@ describe("GET /api/articles", () => {
     })
   })
 })
-
+describe("GET /api/articles/:article_id/comments", () => {
+  test ("200: returns an array of all comment objects for a parametric request to an article via article_id, with a single specific comment", () => {
+    return request(app)
+    .get("/api/articles/6/comments")
+    .expect(200)
+    .then(({body})=>{
+      const {comments} = body
+      expect(comments).toEqual([{
+        body: "This is a bad article name",
+        votes: 1,
+        author: "butter_bridge",
+        article_id: 6,
+        created_at: "2020-10-11T15:23:00.000Z",
+        comment_id: 16
+      }])
+    })
+  })
+  test("200: checks a parametric request to an article with multiple known number of comments (2) for correct keys", () => {
+    return request(app)
+    .get("/api/articles/5/comments")
+    .expect(200)
+    .then(({body})=>{
+      const {comments} = body
+      console.log(JSON.stringify(comments, null, 2))
+      if (comments.length === 2){
+        comments.forEach((comment)=>{
+          expect(comment).toMatchObject({
+            body: expect.any(String),
+            votes: expect.any(Number),
+            author: expect.any(String),
+            article_id: expect.any(Number),
+            created_at: expect.any(String),
+            comment_id: expect.any(Number)
+          })
+        })
+      }
+    })
+  })
+  test("200: query returns most recent comments first", () => {
+    return request(app)
+    .get("/api/articles/1/comments")
+    .expect(200)
+    .then(({body})=>{
+      const {comments} = body
+      expect(comments).toBeSortedBy("created_at", {descending: true})
+    })
+  })
+  test("200: if an article has no comments, we still receive a 200 request with an empty array", () => {
+    return request(app)
+    .get("/api/articles/2/comments")
+    .expect(200)
+    .then(({body})=>{
+    const {comments} = body
+    expect(comments).toEqual([])
+    })
+  })
+  test("400: bad request made when incorrect article_id given", () => {
+    return request(app)
+    .get("/api/articles/xyz/comments")
+    .expect(400)
+    .then(({body})=>{
+      const {msg} = body
+      expect(msg).toBe('Bad request')
+    })
+  })
+})
 
 // console.log(JSON.stringify(articles, null, 2), "article for endpoints")

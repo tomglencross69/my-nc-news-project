@@ -27,8 +27,18 @@ LEFT JOIN comments
 ON articles.article_id = comments.article_id
 GROUP BY 
 articles.article_id
-ORDER BY articles.created_at ASC;`)
+ORDER BY articles.created_at DESC;`)
     .then(({rows})=>{
         return rows
     })
+}
+
+exports.fetchCommentsByArticleId = (article_id) => {
+    return db
+    .query(`SELECT * FROM comments
+        WHERE comments.article_id = $1
+        ORDER BY comments.created_at DESC;`, [article_id])
+        .then(({rows})=>{
+            return rows
+        })
 }
