@@ -4,8 +4,6 @@ const request = require("supertest")
 const seed = require(`${__dirname}/../db/seeds/seed.js`)
 const data = require(`${__dirname}/../db/data/test-data/index.js`)
 const db = require(`${__dirname}/../db/connection.js`)
-//require supertest to run request(app)
-/* Set up your test imports here */
 
 beforeEach(()=>{
   return seed(data)
@@ -15,8 +13,17 @@ afterAll(()=>{
   return db.end()
 })
 
-/* Set up your beforeEach & afterAll functions here */
-
+describe("GET 404: for all incorrect URL GET requests", () => {
+  test("404: responds with custom 'Not available' message as part of generic error handling middleware", () => {
+    return request(app)
+    .get("/api/any-incorrect-url-get-request")
+    .expect(404)
+    .then(({body})=>{
+      const {msg} = body
+      expect(msg).toBe('Not available')
+    })
+  })
+})
 describe("GET /api", () => {
   test("200: Responds with an object detailing the documentation for each endpoint", () => {
     return request(app)
@@ -33,12 +40,14 @@ describe("GET /api/topics", () => {
     .expect(200)
     .then(({body}) => {
       const { topics } = body
-      topics.forEach((topic)=>{
+      if (topics.length) {
+        topics.forEach((topic)=>{
         expect(topic).toMatchObject({
           slug: expect.any(String),
           description: expect.any(String)
         })
       })
+    }
     })
   })
   test("404: responds with a custom error code when get request is made to misspelled api/topics (or miseplled request made to any other api)", () => {
@@ -50,7 +59,6 @@ describe("GET /api/topics", () => {
       expect(msg).toBe("Not available")
     })
   })
-  //write some error tests and build error functionality
 })
 });
 describe("GET /api/articles/:article_id", () => {
@@ -77,7 +85,6 @@ describe("GET /api/articles/:article_id", () => {
         votes: expect.any(Number),
         article_img_url: expect.any(String)
       })
-      console.log(JSON.stringify(article, null, 2), "article for endpoints")
     })
   })
   test("400: bad request, responds with error if given an invalid article id", () => {
@@ -97,4 +104,50 @@ describe("GET /api/articles/:article_id", () => {
     })
   })
 })
+describe("GET /api/articles", () => {
+  test("200: responds with array of article objects each with specific properties, and without body property", () => {
+    return request(app)
+    .get("/api/articles")
+    .expect(200)
+    .then(({body})=>{
+      const {articles} = body
+      if (articles.length){
+        articles.forEach((article)=>{
+          expect(article).toMatchObject(
+            {
+              title: expect.any(String),
+              topic: expect.any(String),
+              author: expect.any(String),
+              created_at: expect.any(String),
+              article_img_url: expect.any(String),
+              article_id: expect.any(Number),
+              comment_count: expect.any(String),
+              votes: expect.any(Number)
+            }
+          )
+        })
+      }
+    })
+  })
+  test("200: responds with array of article objects in ascending order of date created", () => {
+    return request(app)
+    .get("/api/articles")
+    .expect(200)
+    .then(({body})=>{
+      const {articles} = body
+      expect(articles).toBeSortedBy("created_at")
+    })
+  })
+  test("404: endpoint not found when articles typo etc", () => {
+    return request(app)
+    .get("/api/articlesxxx")
+    .expect(404)
+    .then(({body})=>{
+      const {msg} = body
+      expect(msg).toBe('Not available')
+    })
+  })
+})
 
+
+// console.log(JSON.stringify(articles, null, 2), "article for endpoints")
