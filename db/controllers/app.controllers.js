@@ -1,5 +1,5 @@
 const endpointsJson = require(`${__dirname}/../../endpoints.json`)
-const {fetchTopics, fetchArticleById, fetchArticles, fetchCommentsByArticleId} = require(`${__dirname}/../models/app.models.js`)
+const {fetchTopics, fetchArticleById, fetchArticles, fetchCommentsByArticleId, insertCommentByArticleId} = require(`${__dirname}/../models/app.models.js`)
 
 exports.getApi = (request, response) => {
     response.status(200).send({endpoints: endpointsJson});
@@ -35,6 +35,16 @@ exports.getCommentsByArticleId = (request, response, next) => {
     fetchCommentsByArticleId(article_id)
     .then((comments)=>{
         response.status(200).send({comments})
+    })
+    .catch(next)
+}
+
+exports.postCommentsByArticleId = (request, response, next) => {
+    const {article_id} = request.params
+    const comment = request.body
+    insertCommentByArticleId(article_id, comment)
+    .then((comment) => {
+        response.status(201).send({comment})
     })
     .catch(next)
 }

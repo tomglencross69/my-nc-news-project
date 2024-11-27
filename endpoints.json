@@ -62,5 +62,20 @@
         "created_at": "2020-06-09T05:00:00.000Z"
       }
     ]
+  },
+  "POST /api/articles/:article_id/comments": {
+    "description": "posts a comment to the article given in the parametric request",
+    "queries": ["article_id", "comment"],
+    "example response": [
+      {
+        "comment_id": 19,
+        "body": "No comment",
+        "article_id": 1,
+        "author": "lurker",
+        "votes": 0,
+        "created_at": "2024-11-27T10:32:17.332Z"
+      }
+    ]
   }
 }
+

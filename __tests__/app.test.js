@@ -171,7 +171,6 @@ describe("GET /api/articles/:article_id/comments", () => {
     .expect(200)
     .then(({body})=>{
       const {comments} = body
-      console.log(JSON.stringify(comments, null, 2))
       if (comments.length === 2){
         comments.forEach((comment)=>{
           expect(comment).toMatchObject({
@@ -223,5 +222,63 @@ describe("GET /api/articles/:article_id/comments", () => {
     })
   })
 })
-
-// console.log(JSON.stringify(articles, null, 2), "article for endpoints")
+describe("POST: api/articles/:article_id/comments", () => {
+  test("201: comment successfully posts to a given article", () => {
+    const newComment = {username: "lurker", body: "No comment"}
+    return request(app)
+    .post("/api/articles/1/comments")
+    .send(newComment)
+    .expect(201)
+    .then(({body})=>{
+      const {comment} = body
+      expect(comment).toEqual(expect.objectContaining({
+        author: "lurker",
+        body: 'No comment'
+      }))
+    })
+  })
+  test("404: username not valid, does not belong to users database", () => {
+    const newComment = {username: "InvalidUser", body: "No comment"}
+    return request(app)
+    .post("/api/articles/1/comments")
+    .send(newComment)
+    .expect(404)
+    .then(({body})=>{
+      const {msg} = body
+      expect(msg).toBe('Key (author)=(InvalidUser) is not present in table "users".')
+    })
+  })
+  test("404: article not found when passed parametric request for non-existent article_id", () => {
+    const newComment = {username: "lurker", body: "No comment"}
+    return request(app)
+    .post("/api/articles/999999/comments")
+    .send(newComment)
+    .expect(404)
+    .then(({body})=>{
+      const {msg} = body
+      expect(msg).toBe('Key (article_id)=(999999) is not present in table \"articles\".')
+    })
+  })
+  test("400: bad parametric request made for article given as string rather than number", () => {
+    const newComment = {username: "lurker", body: "No comment"}
+    return request(app)
+    .post("/api/articles/one/comments")
+    .send(newComment)
+    .expect(400)
+    .then(({body})=>{
+      const {msg} = body
+      expect(msg).toBe('Bad request')
+    })
+  })
+  test("400: bad request made when comment object does not contain correct keys", () => {
+    const newComment = {user: "lurker", bod: "No comment"}
+    return request(app)
+    .post("/api/articles/1/comments")
+    .send(newComment)
+    .expect(400)
+    .then(({body})=>{
+      const {msg} = body
+      expect(msg).toBe('Error in structure of request')
+    })
+  })
+})

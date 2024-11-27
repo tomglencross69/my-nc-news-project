@@ -1,4 +1,4 @@
 node_modules
 .env.*
-/sql-test-pad.sql
-/sql-test-pad.txt
+sql-test-pad.sql
+sql-test-pad.txt
