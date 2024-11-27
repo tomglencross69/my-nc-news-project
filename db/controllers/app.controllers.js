@@ -1,5 +1,7 @@
+const { request, response } = require("../app");
+
 const endpointsJson = require(`${__dirname}/../../endpoints.json`)
-const {fetchTopics, fetchArticleById, fetchArticles, fetchCommentsByArticleId, insertCommentByArticleId} = require(`${__dirname}/../models/app.models.js`)
+const {fetchTopics, fetchArticleById, fetchArticles, fetchCommentsByArticleId, insertCommentByArticleId, updateVotesByArticleId} = require(`${__dirname}/../models/app.models.js`)
 
 exports.getApi = (request, response) => {
     response.status(200).send({endpoints: endpointsJson});
@@ -45,6 +47,16 @@ exports.postCommentsByArticleId = (request, response, next) => {
     insertCommentByArticleId(article_id, comment)
     .then((comment) => {
         response.status(201).send({comment})
+    })
+    .catch(next)
+}
+
+exports.patchVotesByArticleId = (request, response, next) => {
+    const {article_id} = request.params
+    const vote = request.body
+    updateVotesByArticleId(article_id, vote)
+    .then((updatedArticle) => {
+        response.status(200).send({updatedArticle})
     })
     .catch(next)
 }

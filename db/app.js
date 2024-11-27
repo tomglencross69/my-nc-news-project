@@ -1,5 +1,5 @@
 const express = require("express")
-const {getApi, getTopics, getArticleById, getArticles, getCommentsByArticleId, postCommentsByArticleId} = require (`${__dirname}/controllers/app.controllers.js`)
+const {getApi, getTopics, getArticleById, getArticles, getCommentsByArticleId, postCommentsByArticleId, patchVotesByArticleId} = require (`${__dirname}/controllers/app.controllers.js`)
 const app = express()
 
 app.get("/api", getApi)
@@ -15,6 +15,8 @@ app.get("/api/articles/:article_id/comments", getCommentsByArticleId)
 app.use(express.json())
 
 app.post("/api/articles/:article_id/comments", postCommentsByArticleId)
+
+app.patch("/api/articles/:article_id", patchVotesByArticleId)
 
 app.use("/*", (request, response, next) => {
     response.status(404).send({msg: "Not available"})

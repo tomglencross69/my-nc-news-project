@@ -60,3 +60,5 @@ SELECT * FROM comments
 WHERE comments.article_id = 2;
 
 SELECT * FROM comments;
+
+SELECT * FROM articles;
