@@ -282,3 +282,72 @@ describe("POST: api/articles/:article_id/comments", () => {
     })
   })
 })
+describe("PATCH /api/articles/:article_id", () => {
+  test("200: successfully patches specified article with correct postitve vote increase", () => {
+    const newVote = {inc_votes: 1}
+    return request(app)
+    .patch("/api/articles/1")
+    .send(newVote)
+    .expect(200)
+    .then(({body})=>{
+      const {updatedArticle} = body
+      expect(updatedArticle.votes).toBe(101)
+    })
+  })
+  test("200: successfully patches specified article with correct negative vote decrease", () => {
+    const newVote = {inc_votes: -1}
+    return request(app)
+    .patch("/api/articles/1")
+    .send(newVote)
+    .expect(200)
+    .then(({body})=>{
+      const {updatedArticle} = body
+      expect(updatedArticle.votes).toBe(99)
+    })
+  })
+  test("200: successfully patches specified article when resulting votes will be negative", () => {
+    const newVote = {inc_votes: -101}
+    return request(app)
+    .patch("/api/articles/1")
+    .send(newVote)
+    .expect(200)
+    .then(({body})=>{
+      const {updatedArticle} = body
+      expect(updatedArticle.votes).toBe(-1)
+    })
+  })
+  test("400: bad request given with string of article_id instead of number ", () => {
+    const newVote = {inc_votes: -1}
+    return request(app)
+    .patch("/api/articles/one")
+    .send(newVote)
+    .expect(400)
+    .then(({body})=>{
+      const {msg} = body
+      expect(msg).toBe('Bad request')
+    })
+  })
+  test("400: bad request given with object with invalid keys", () => {
+    const newVote = {votesSchmotes: -1}
+    return request(app)
+    .patch("/api/articles/1")
+    .send(newVote)
+    .expect(400)
+    .then(({body})=>{
+      const {msg} = body
+      expect(msg).toBe('Error in structure of request')
+    })
+  })
+  test("404: request made to non-existent article", () => {
+    const newVote = {inc_votes: -1}
+    return request(app)
+    .patch("/api/articles/999999")
+    .send(newVote)
+    .expect(404)
+    .then(({body})=>{
+      const {msg} = body
+      expect(msg).toBe('Article not available or does not exist')
+    })
+  })
+})
+
