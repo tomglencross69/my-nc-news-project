@@ -104,7 +104,7 @@ describe("GET /api/articles/:article_id", () => {
     })
   })
 })
-describe("GET /api/articles", () => {
+describe.only("GET /api/articles", () => {
   test("200: responds with array of article objects each with specific properties, and without body property", () => {
     return request(app)
     .get("/api/articles")
@@ -417,6 +417,17 @@ describe("GET /api/users", () => {
     .then(({body}) => {
       const {msg} = body
       expect(msg).toBe('Not available')
+    })
+  })
+})
+describe.only("GET /api/articles with sorting queries", () => {
+  test("200: retrieves array of article objects ordered by title alphabetically ascending", () => {
+    return request(app)
+    .get("/api/articles?sort_by=title&order=asc")
+    .expect(200)
+    .then(({body}) => {
+      const {articles} = body
+      expect(articles).toBeSortedBy("title")
     })
   })
 })

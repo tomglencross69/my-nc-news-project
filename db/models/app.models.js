@@ -19,18 +19,59 @@ exports.fetchArticleById = (article_id) => {
     })
 }
 
-exports.fetchArticles = () => {
-    return db
-    .query(`SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id) AS comment_count
-FROM articles
-LEFT JOIN comments
-ON articles.article_id = comments.article_id
-GROUP BY 
-articles.article_id
-ORDER BY articles.created_at DESC;`)
-    .then(({rows})=>{
-        return rows
-    })
+/*
+sort_by, which sorts the articles by any valid column (defaults to the created_at date).
+order, which can be set to asc or desc for ascending or descending (defaults to descending).
+*/
+exports.fetchArticles = (sort_by, order) => {
+    if (!sort_by && !order) {
+        return db
+        .query(`SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id) AS comment_count
+        FROM articles
+        LEFT JOIN comments
+        ON articles.article_id = comments.article_id
+        GROUP BY 
+        articles.article_id
+        ORDER BY articles.created_at DESC;`)
+        .then(({rows})=>{
+            return rows
+        })
+    } else {
+        let queryStr = (`SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id) AS comment_count
+        FROM articles
+        LEFT JOIN comments
+        ON articles.article_id = comments.article_id
+        GROUP BY 
+        articles.article_id`)
+
+        const validInputs = [
+            "article_id",
+            "title",
+            "topic",
+            "author",
+            "created_at",
+            "votes",
+            "comment_count",
+            "article_img_url"
+        ]
+
+        if (!validInputs.includes(sort_by)) {
+            return Promise.reject({status:400, msg: "Bad request"})
+        }
+
+        if (sort_by && order) {
+            queryStr += ` ORDER BY ${sort_by} ${order}`
+        }
+        else if (sort_by) {
+            queryStr += ` ORDER BY ${sort_by}`
+        }
+        else if (order) {
+            queryStr += ` ORDER BY created_at ${order}`
+        }
+        return db.query(queryStr).then(({rows}) => {
+            return rows
+        })
+        }
 }
 
 exports.fetchCommentsByArticleId = (article_id) => {
