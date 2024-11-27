@@ -1,7 +1,7 @@
 const { request, response } = require("../app");
 
 const endpointsJson = require(`${__dirname}/../../endpoints.json`)
-const {fetchTopics, fetchArticleById, fetchArticles, fetchCommentsByArticleId, insertCommentByArticleId, updateVotesByArticleId, removeComment} = require(`${__dirname}/../models/app.models.js`)
+const {fetchTopics, fetchArticleById, fetchArticles, fetchCommentsByArticleId, insertCommentByArticleId, updateVotesByArticleId, removeComment, fetchUsers} = require(`${__dirname}/../models/app.models.js`)
 
 exports.getApi = (request, response) => {
     response.status(200).send({endpoints: endpointsJson});
@@ -66,6 +66,14 @@ exports.deleteComment = (request, response, next) => {
     removeComment(comment_id)
     .then((deletedComment) => {
         response.status(204).send({deletedComment})
+    })
+    .catch(next)
+}
+
+exports.getUsers = (request, response, next) => {
+    fetchUsers()
+    .then((users) => {
+        response.status(200).send({users})
     })
     .catch(next)
 }
