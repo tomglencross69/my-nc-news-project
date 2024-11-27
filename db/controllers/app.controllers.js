@@ -41,8 +41,8 @@ exports.getCommentsByArticleId = (request, response, next) => {
 
 exports.postCommentsByArticleId = (request, response, next) => {
     const {article_id} = request.params
-    const {username, body} = request.bodu
-    insertCommentByArticleId(article_id, username, body)
+    const comment = request.body
+    insertCommentByArticleId(article_id, comment)
     .then((comment) => {
         response.status(201).send({comment})
     })
