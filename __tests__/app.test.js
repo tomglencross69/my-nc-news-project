@@ -338,6 +338,17 @@ describe("PATCH /api/articles/:article_id", () => {
       expect(msg).toBe('Error in structure of request')
     })
   })
+  test("400: bad request given with object with valid keys but invalid values", () => {
+    const newVote = {inc_votes: "like"}
+    return request(app)
+    .patch("/api/articles/1")
+    .send(newVote)
+    .expect(400)
+    .then(({body})=>{
+      const {msg} = body
+      expect(msg).toBe('Bad request')
+    })
+  })
   test("404: request made to non-existent article", () => {
     const newVote = {inc_votes: -1}
     return request(app)
@@ -350,4 +361,37 @@ describe("PATCH /api/articles/:article_id", () => {
     })
   })
 })
-
+describe("DELETE: /api/comments/:comment_id", () => {
+  test("204: no content, specified comment successfully deleted", () => {
+    return request(app)
+    .delete("/api/comments/1")
+    .expect(204)
+    .then(({body})=>{
+    const results = body
+    return db.query(`SELECT * FROM comments
+      WHERE comment_id = 1;`)
+      .then(({rows}) => {
+        expect(rows.length).toEqual(0)
+        expect(results).toEqual({})
+      })
+    })
+  })
+  test("404: request made to delete non-existent comment", () => {
+    return request(app)
+    .delete("/api/comments/9999999")
+    .expect(404)
+    .then(({body})=>{
+    const {msg} = body
+    expect(msg).toBe("Comment not available or does not exist")
+    })
+  })
+  test("400: bad request made to delete invalid comment id", () => {
+    return request(app)
+    .delete("/api/comments/one")
+    .expect(400)
+    .then(({body})=>{
+    const {msg} = body
+    expect(msg).toBe("Bad request")
+    })
+  })
+})
