@@ -561,5 +561,3 @@ describe("GET /api/articles/:article_id comment count", () => {
     })
   })
 })
-
-//HAVENT MADE NEW BRANCH YET?? DO I NEED??
