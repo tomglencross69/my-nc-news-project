@@ -485,3 +485,41 @@ describe.only("GET /api/articles with sorting queries", () => {
     })
   })
 })
+describe.only("GET /api/articles topic query", () => {
+test("200: retrieves articles belonging to a specific topic value", () => {
+  return request(app)
+  .get("/api/articles?topic=cats")
+  .expect(200)
+  .then(({body}) => {
+    const {articles} = body
+    expect(articles[0].topic).toBe("cats")
+  })
+})
+test("200: retrieves all articles if no endpoint specified", () => {
+  return request(app)
+  .get("/api/articles")
+  .expect(200)
+  .then(({body}) => {
+    const {articles} = body
+    expect(articles.length).toBe(13)
+  })
+})
+test("404: request made for topic that doesn't exist", () => {
+  return request(app)
+  .get("/api/articles?topic=catxxx")
+  .expect(404)
+  .then(({body}) => {
+    const {msg} = body
+    expect(msg).toBe('Topic not available or does not exist')
+  })
+})
+test("400: bad request made to misspelt articles url", () => {
+  return request(app)
+  .get("/api/articlesxxx?topic=cats")
+  .expect(404)
+  .then(({body}) => {
+    const {msg} = body
+    expect(msg).toBe('Not available')
+  })
+})
+})

@@ -2,6 +2,7 @@ const { request, response } = require("../app");
 
 const endpointsJson = require(`${__dirname}/../../endpoints.json`)
 const {fetchTopics, fetchArticleById, fetchArticles, fetchCommentsByArticleId, insertCommentByArticleId, updateVotesByArticleId, removeComment, fetchUsers} = require(`${__dirname}/../models/app.models.js`)
+const {checkTopicExists} = require(`${__dirname}/../utilities/utilities.js`)
 
 exports.getApi = (request, response) => {
     response.status(200).send({endpoints: endpointsJson});
@@ -25,9 +26,13 @@ exports.getArticleById = (request, response, next) => {
 }
 
 exports.getArticles = (request, response, next) => {
-    const {sort_by, order} = request.query
-    fetchArticles(sort_by, order)
-    .then((articles) => {
+    const {sort_by, order, topic} = request.query
+    const promises = [fetchArticles(sort_by, order, topic)]
+    if (topic){
+        promises.push(checkTopicExists(topic))
+    }
+    Promise.all(promises)
+    .then(([articles]) => {
         response.status(200).send({articles})
     })
     .catch(next)
