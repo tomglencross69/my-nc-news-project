@@ -61,7 +61,7 @@ describe("GET /api/topics", () => {
   })
 })
 });
-describe("GET /api/articles/:article_id", () => {
+describe.only("GET /api/articles/:article_id", () => {
   test("200: responds with an article object from parametric id request", () => {
     return request(app)
     .get("/api/articles/1")
@@ -104,7 +104,7 @@ describe("GET /api/articles/:article_id", () => {
     })
   })
 })
-describe.only("GET /api/articles", () => {
+describe("GET /api/articles", () => {
   test("200: responds with array of article objects each with specific properties, and without body property", () => {
     return request(app)
     .get("/api/articles")
@@ -420,7 +420,7 @@ describe("GET /api/users", () => {
     })
   })
 })
-describe.only("GET /api/articles with sorting queries", () => {
+describe("GET /api/articles with sorting queries", () => {
   test("200: retrieves array of article objects ordered by title alphabetically ascending", () => {
     return request(app)
     .get("/api/articles?sort_by=title&order=asc")
@@ -485,7 +485,7 @@ describe.only("GET /api/articles with sorting queries", () => {
     })
   })
 })
-describe.only("GET /api/articles topic query", () => {
+describe("GET /api/articles topic query", () => {
 test("200: retrieves articles belonging to a specific topic value", () => {
   return request(app)
   .get("/api/articles?topic=cats")
@@ -522,4 +522,42 @@ test("400: bad request made to misspelt articles url", () => {
     expect(msg).toBe('Not available')
   })
 })
+})
+describe.only("GET /api/articles/:article_id comment count", () => {
+  test("200: retrieves article with parametric id request, now with updated comment_count key", () => {
+    return request(app)
+    .get("/api/articles/1")
+    .expect(200)
+    .then(({body}) => {
+      const {article} = body
+      expect(article.comment_count).toBe("11")
+    })
+  })
+  test("200: retrieves article with no votes and gives a string of zero", () => {
+    return request(app)
+    .get("/api/articles/7")
+    .expect(200)
+    .then(({body}) => {
+      const {article} = body
+      expect(article.comment_count).toBe("0")
+    })
+  })
+  test("400: bad request made to misspelt articles url", () => {
+    return request(app)
+    .get("/api/articlesxxx/1")
+    .expect(404)
+    .then(({body}) => {
+      const {msg} = body
+      expect(msg).toBe('Not available')
+    })
+  })
+  test("404: request made to non-existent articles_id", () => {
+    return request(app)
+    .get("/api/articles/999999")
+    .expect(404)
+    .then(({body}) => {
+      const {msg} = body
+      expect(msg).toBe('Article not found')
+    })
+  })
 })
