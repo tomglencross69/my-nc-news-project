@@ -65,7 +65,7 @@ exports.patchVotesByArticleId = (request, response, next) => {
     .catch(next)
 }
 
-exports.deleteComment = (request, response, next) => {
+exports.deleteComment = (reques, response, next) => {
     const {comment_id} = request.params
     removeComment(comment_id)
     .then((deletedComment) => {
