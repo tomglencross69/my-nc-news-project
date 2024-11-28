@@ -61,7 +61,7 @@ describe("GET /api/topics", () => {
   })
 })
 });
-describe.only("GET /api/articles/:article_id", () => {
+describe("GET /api/articles/:article_id", () => {
   test("200: responds with an article object from parametric id request", () => {
     return request(app)
     .get("/api/articles/1")
@@ -523,7 +523,7 @@ test("400: bad request made to misspelt articles url", () => {
   })
 })
 })
-describe.only("GET /api/articles/:article_id comment count", () => {
+describe("GET /api/articles/:article_id comment count", () => {
   test("200: retrieves article with parametric id request, now with updated comment_count key", () => {
     return request(app)
     .get("/api/articles/1")
@@ -561,3 +561,5 @@ describe.only("GET /api/articles/:article_id comment count", () => {
     })
   })
 })
+
+//HAVENT MADE NEW BRANCH YET?? DO I NEED??
