@@ -44,7 +44,7 @@ exports.fetchArticles = (sort_by, order) => {
         GROUP BY 
         articles.article_id`)
 
-        const validInputs = [
+        const validSortingInputs = [
             "article_id",
             "title",
             "topic",
@@ -55,7 +55,16 @@ exports.fetchArticles = (sort_by, order) => {
             "article_img_url"
         ]
 
-        if (!validInputs.includes(sort_by)) {
+        const validOrderingInputs = [
+            "asc",
+            "desc",
+        ]
+
+        if (sort_by && !validSortingInputs.includes(sort_by)) {
+            return Promise.reject({status:400, msg: "Bad request"})
+        }
+
+        if(order && !validOrderingInputs.includes(order)) {
             return Promise.reject({status:400, msg: "Bad request"})
         }
 
@@ -63,7 +72,7 @@ exports.fetchArticles = (sort_by, order) => {
             queryStr += ` ORDER BY ${sort_by} ${order}`
         }
         else if (sort_by) {
-            queryStr += ` ORDER BY ${sort_by}`
+            queryStr += ` ORDER BY ${sort_by} DESC`
         }
         else if (order) {
             queryStr += ` ORDER BY created_at ${order}`

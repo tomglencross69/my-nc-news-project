@@ -430,4 +430,58 @@ describe.only("GET /api/articles with sorting queries", () => {
       expect(articles).toBeSortedBy("title")
     })
   })
+  test("200: retrieves array of article objects ordered by title alphabetically descending if no order given", () => {
+    return request(app)
+    .get("/api/articles?sort_by=title")
+    .expect(200)
+    .then(({body}) => {
+      const {articles} = body
+      expect(articles).toBeSortedBy("title", {descending: true})
+    })
+  })
+  test("200: retrieves array of article objects without queries, defaulting to created_at descending ", () => {
+    return request(app)
+    .get("/api/articles")
+    .expect(200)
+    .then(({body}) => {
+      const {articles} = body
+      expect(articles).toBeSortedBy("created_at", {descending: true})
+    })
+  })
+  test("200: retrieves array of article objects without sort by queries, defaulting to created_at, but with order query requesting ascending", () => {
+    return request(app)
+    .get("/api/articles?order=asc")
+    .expect(200)
+    .then(({body}) => {
+      const {articles} = body
+      expect(articles).toBeSortedBy("created_at")
+    })
+  })
+  test("400: invalid sort_by query given", () => {
+    return request(app)
+    .get("/api/articles?sort_by=votesssss")
+    .expect(400)
+    .then(({body}) => {
+      const {msg} = body
+      expect(msg).toBe("Bad request")
+    })
+  })
+  test("400: invalid order query given", () => {
+    return request(app)
+    .get("/api/articles?order=ascending")
+    .expect(400)
+    .then(({body}) => {
+      const {msg} = body
+      expect(msg).toBe("Bad request")
+    })
+  })
+  test("404: request made to non-existant articles endpoint", () => {
+    return request(app)
+    .get("/api/articlesxxx?sort_by=title&order=asc")
+    .expect(404)
+    .then(({body}) => {
+      const {msg} = body
+      expect(msg).toBe("Not available")
+    })
+  })
 })
