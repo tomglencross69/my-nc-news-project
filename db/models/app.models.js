@@ -19,12 +19,18 @@ exports.fetchArticleById = (article_id) => {
     })
 }
 
-/*
-sort_by, which sorts the articles by any valid column (defaults to the created_at date).
-order, which can be set to asc or desc for ascending or descending (defaults to descending).
-*/
-exports.fetchArticles = (sort_by, order) => {
-    if (!sort_by && !order) {
+exports.fetchArticles = (sort_by, order, topic) => {
+    if (topic) {
+        return db
+        .query(`SELECT * FROM articles
+            WHERE articles.topic = $1`, [topic])
+            .then(({rows}) => {
+                return rows
+            })
+        }
+
+    
+    if (!sort_by && !order && !topic) {
         return db
         .query(`SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id) AS comment_count
         FROM articles
