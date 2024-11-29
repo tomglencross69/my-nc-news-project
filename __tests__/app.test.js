@@ -519,3 +519,41 @@ describe("GET /api/articles/:article_id comment count", () => {
     })
   })
 })
+describe.only("GET /api/users/:username", () => {
+  test("200: responds with an user object from parametric username request", () => {
+    return request(app)
+    .get("/api/users/lurker")
+    .expect(200)
+    .then(({body : {user}})=> {
+      expect(user.username).toBe("lurker")
+    })
+  })
+  test("200: responds with user object with specific keys", () => {
+    return request(app)
+    .get("/api/users/lurker")
+    .expect(200)
+    .then(({body: {user}})=> {
+      expect(user).toMatchObject({
+        username: expect.any(String),
+        name: expect.any(String),
+        avatar_url: expect.any(String)
+      })
+    })
+  }) 
+ test('404: user not found when given valid but non-existent username', () => {
+    return request(app)
+    .get("/api/users/tommyg")
+    .expect(404)
+    .then((response)=>{
+      expect(response.body.msg).toBe('User not available or does not exist')
+    })
+  })
+  test('400: bad request when given invalid username (ie. not a string', () => {
+    return request(app)
+    .get("/api/users/69")
+    .expect(400)
+    .then((response)=>{
+      expect(response.body.msg).toBe('Bad request: invalid username format')
+    })
+  })
+})

@@ -19,6 +19,7 @@ exports.customErrors = ((error, request, response, next) => {
 })
 
 exports.serverError = ((error, request, response, next) => {
+    console.log(error, "error in 500")
     response.status(500).send({msg: 'Internal server error'})
 })
 
