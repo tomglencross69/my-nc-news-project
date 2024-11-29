@@ -548,7 +548,7 @@ describe.only("GET /api/users/:username", () => {
       expect(response.body.msg).toBe('User not available or does not exist')
     })
   })
-  test('400: bad request when given invalid username (ie. not a string', () => {
+  test('400: bad request when given invalid username (ie. number)', () => {
     return request(app)
     .get("/api/users/69")
     .expect(400)
