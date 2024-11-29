@@ -27,78 +27,77 @@ exports.fetchArticleById = (article_id) => {
 }
 
 exports.fetchArticles = (sort_by, order, topic) => {
-    if (topic) {
-        return db
-        .query(`SELECT * FROM articles
-            WHERE articles.topic = $1`, [topic])
-            .then(({rows}) => {
-                return rows
-            })
-        }
-
     
     if (!sort_by && !order && !topic) {
         return db
         .query(`SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id) AS comment_count
-        FROM articles
-        LEFT JOIN comments
-        ON articles.article_id = comments.article_id
-        GROUP BY 
-        articles.article_id
-        ORDER BY articles.created_at DESC;`)
-        .then(({rows})=>{
-            return rows
-        })
-    } else {
-        let queryStr = (`SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id) AS comment_count
-        FROM articles
-        LEFT JOIN comments
-        ON articles.article_id = comments.article_id
-        GROUP BY 
-        articles.article_id`)
-
-        const validSortingInputs = [
-            "article_id",
-            "title",
-            "topic",
-            "author",
-            "created_at",
-            "votes",
-            "comment_count",
-            "article_img_url"
-        ]
-
-        const validOrderingInputs = [
-            "asc",
-            "desc",
-        ]
-
-        if (sort_by && !validSortingInputs.includes(sort_by)) {
-            return Promise.reject({status:400, msg: "Bad request"})
+            FROM articles
+            LEFT JOIN comments
+            ON articles.article_id = comments.article_id
+            GROUP BY 
+            articles.article_id
+            ORDER BY articles.created_at DESC;`)
+            .then(({rows})=>{
+                return rows
+            })
+        } else {
+            let queryStr = (`SELECT articles.article_id, articles.title, articles.topic, articles.author, articles.created_at, articles.votes, articles.article_img_url, COUNT(comments.comment_id) AS comment_count
+                FROM articles
+                LEFT JOIN comments
+                ON articles.article_id = comments.article_id
+                GROUP BY 
+                articles.article_id`)
+                
+                const validSortingInputs = [
+                    "article_id",
+                    "title",
+                    "topic",
+                    "author",
+                    "created_at",
+                    "votes",
+                    "comment_count",
+                    "article_img_url"
+                ]
+                
+                const validOrderingInputs = [
+                    "asc",
+                    "desc",
+                ]
+                
+                if (sort_by && !validSortingInputs.includes(sort_by)) {
+                    return Promise.reject({status:400, msg: "Bad request"})
+                }
+                
+                if(order && !validOrderingInputs.includes(order)) {
+                    return Promise.reject({status:400, msg: "Bad request"})
+                }
+                
+                if (sort_by && order) {
+                    queryStr += ` ORDER BY ${sort_by} ${order}`
+                }
+                else if (sort_by) {
+                    queryStr += ` ORDER BY ${sort_by} DESC`
+                }
+                else if (order) {
+                    queryStr += ` ORDER BY created_at ${order}`
+                }
+                else if (topic) {
+                    return db
+                    .query(`SELECT * FROM articles
+                        WHERE articles.topic = $1`, [topic])
+                        .then(({rows}) => {
+                            return rows
+                        })
+                    }
+                return db.query(queryStr).then(({rows}) => {
+                    return rows
+                })
+            }
         }
-
-        if(order && !validOrderingInputs.includes(order)) {
-            return Promise.reject({status:400, msg: "Bad request"})
-        }
-
-        if (sort_by && order) {
-            queryStr += ` ORDER BY ${sort_by} ${order}`
-        }
-        else if (sort_by) {
-            queryStr += ` ORDER BY ${sort_by} DESC`
-        }
-        else if (order) {
-            queryStr += ` ORDER BY created_at ${order}`
-        }
-        return db.query(queryStr).then(({rows}) => {
-            return rows
-        })
-        }
-}
-
-exports.fetchCommentsByArticleId = (article_id) => {
-    return db
-    .query(`SELECT * FROM comments
+        
+        exports.fetchCommentsByArticleId = (article_id) => {
+            return db
+            .query(`SELECT * FROM comments
         WHERE comments.article_id = $1
         ORDER BY comments.created_at DESC;`, [article_id])
         .then(({rows})=>{

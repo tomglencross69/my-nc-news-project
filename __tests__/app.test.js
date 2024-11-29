@@ -13,7 +13,7 @@ afterAll(()=>{
   return db.end()
 })
 
-describe("GET 404: for all incorrect URL GET requests", () => {
+describe("GET 404: for all bad endpoint requests", () => {
   test("404: responds with custom 'Not available' message as part of generic error handling middleware", () => {
     return request(app)
     .get("/api/any-incorrect-url-get-request")
@@ -40,23 +40,13 @@ describe("GET /api/topics", () => {
     .expect(200)
     .then(({body}) => {
       const { topics } = body
-      if (topics.length) {
+      expect(topics.length).not.toBe(0)
         topics.forEach((topic)=>{
         expect(topic).toMatchObject({
           slug: expect.any(String),
           description: expect.any(String)
         })
       })
-    }
-    })
-  })
-  test("404: responds with a custom error code when get request is made to misspelled api/topics (or miseplled request made to any other api)", () => {
-    return request(app)
-    .get("/api/topicxxx")
-    .expect(404)
-    .then(({body})=>{
-      const {msg} = body
-      expect(msg).toBe("Not available")
     })
   })
 })
@@ -111,7 +101,7 @@ describe("GET /api/articles", () => {
     .expect(200)
     .then(({body})=>{
       const {articles} = body
-      if (articles.length){
+      expect(articles.length).not.toBe(0)
         articles.forEach((article)=>{
           expect(article).toMatchObject(
             {
@@ -126,7 +116,6 @@ describe("GET /api/articles", () => {
             }
           )
         })
-      }
     })
   })
   test("200: responds with array of article objects in ascending order of date created", () => {
@@ -136,15 +125,6 @@ describe("GET /api/articles", () => {
     .then(({body})=>{
       const {articles} = body
       expect(articles).toBeSortedBy("created_at", {descending: true})
-    })
-  })
-  test("404: endpoint not found when articles typo etc", () => {
-    return request(app)
-    .get("/api/articlesxxx")
-    .expect(404)
-    .then(({body})=>{
-      const {msg} = body
-      expect(msg).toBe('Not available')
     })
   })
 })
@@ -171,7 +151,7 @@ describe("GET /api/articles/:article_id/comments", () => {
     .expect(200)
     .then(({body})=>{
       const {comments} = body
-      if (comments.length === 2){
+      expect(comments.length).toBe(2)
         comments.forEach((comment)=>{
           expect(comment).toMatchObject({
             body: expect.any(String),
@@ -182,7 +162,6 @@ describe("GET /api/articles/:article_id/comments", () => {
             comment_id: expect.any(Number)
           })
         })
-      }
     })
   })
   test("200: query returns most recent comments first", () => {
@@ -230,6 +209,20 @@ describe("POST: api/articles/:article_id/comments", () => {
     .send(newComment)
     .expect(201)
     .then(({body})=>{
+      const {comment} = body
+      expect(comment).toEqual(expect.objectContaining({
+        author: "lurker",
+        body: 'No comment'
+      }))
+    })
+  })
+  test("201: comment successfully posts when comment object has extra property keys", () => {
+    const newCommentExtraKey = {username: "lurker", body: "No comment", attitude: "ambivalent"}
+    return request(app)
+    .post("/api/articles/1/comments")
+    .send(newCommentExtraKey)
+    .expect(201)
+    .then(({body}) => {
       const {comment} = body
       expect(comment).toEqual(expect.objectContaining({
         author: "lurker",
@@ -401,22 +394,14 @@ describe("GET /api/users", () => {
     .get("/api/users")
     .expect(200)
     .then(({body: {users}})=> {
-      users.forEach((user)=> {
-        expect(user).toMatchObject({
-          username: expect.any(String),
-          name: expect.any(String),
-          avatar_url: expect.any(String)
+    expect(users.length).not.toBe(0)
+        users.forEach((user)=> {
+          expect(user).toMatchObject({
+            username: expect.any(String),
+            name: expect.any(String),
+            avatar_url: expect.any(String)
+          })
         })
-      })
-    })
-  })
-  test("404: responds with error when typo made in url slug /users", () => {
-    return request(app)
-    .get("/api/usersxxx")
-    .expect(404)
-    .then(({body}) => {
-      const {msg} = body
-      expect(msg).toBe('Not available')
     })
   })
 })
@@ -475,15 +460,6 @@ describe("GET /api/articles with sorting queries", () => {
       expect(msg).toBe("Bad request")
     })
   })
-  test("404: request made to non-existant articles endpoint", () => {
-    return request(app)
-    .get("/api/articlesxxx?sort_by=title&order=asc")
-    .expect(404)
-    .then(({body}) => {
-      const {msg} = body
-      expect(msg).toBe("Not available")
-    })
-  })
 })
 describe("GET /api/articles topic query", () => {
 test("200: retrieves articles belonging to a specific topic value", () => {
@@ -495,13 +471,13 @@ test("200: retrieves articles belonging to a specific topic value", () => {
     expect(articles[0].topic).toBe("cats")
   })
 })
-test("200: retrieves all articles if no endpoint specified", () => {
+test("200: request made to a topic which currently has no articles associated returns empty array", () => {
   return request(app)
-  .get("/api/articles")
+  .get("/api/articles?topic=paper")
   .expect(200)
   .then(({body}) => {
     const {articles} = body
-    expect(articles.length).toBe(13)
+    expect(articles).toEqual([])
   })
 })
 test("404: request made for topic that doesn't exist", () => {
@@ -511,15 +487,6 @@ test("404: request made for topic that doesn't exist", () => {
   .then(({body}) => {
     const {msg} = body
     expect(msg).toBe('Topic not available or does not exist')
-  })
-})
-test("400: bad request made to misspelt articles url", () => {
-  return request(app)
-  .get("/api/articlesxxx?topic=cats")
-  .expect(404)
-  .then(({body}) => {
-    const {msg} = body
-    expect(msg).toBe('Not available')
   })
 })
 })
@@ -540,15 +507,6 @@ describe("GET /api/articles/:article_id comment count", () => {
     .then(({body}) => {
       const {article} = body
       expect(article.comment_count).toBe("0")
-    })
-  })
-  test("400: bad request made to misspelt articles url", () => {
-    return request(app)
-    .get("/api/articlesxxx/1")
-    .expect(404)
-    .then(({body}) => {
-      const {msg} = body
-      expect(msg).toBe('Not available')
     })
   })
   test("404: request made to non-existent articles_id", () => {
