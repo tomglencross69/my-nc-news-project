@@ -519,7 +519,7 @@ describe("GET /api/articles/:article_id comment count", () => {
     })
   })
 })
-describe.only("GET /api/users/:username", () => {
+describe("GET /api/users/:username", () => {
   test("200: responds with an user object from parametric username request", () => {
     return request(app)
     .get("/api/users/lurker")
