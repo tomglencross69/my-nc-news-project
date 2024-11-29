@@ -1,5 +1,4 @@
 const express = require("express")
-const {getApi, getTopics, getArticleById, getArticles, getCommentsByArticleId, postCommentsByArticleId, patchVotesByArticleId, deleteComment, getUsers} = require (`${__dirname}/controllers/app.controllers.js`)
 const app = express()
 const {postgresErrors, customErrors, serverError} = require(`${__dirname}/errors/error-handling.js`)
 const apiRouter = require(`${__dirname}/routes/api-router.js`)
