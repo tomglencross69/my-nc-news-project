@@ -124,6 +124,15 @@
         "avatar_url": "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png"
       }
     ]
+  },
+  "GET /api/users/:username": {
+    "description": "serves a user parametrically from the given username",
+    "queries": [],
+    "example response": {
+        "username": "butter_bridge",
+        "name": "jonny",
+        "avatar_url": "https://www.healthytherapies.com/wp-content/uploads/2016/06/Lime3.jpg"
+      }
   }
 }
 

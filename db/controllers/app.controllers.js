@@ -1,7 +1,5 @@
-const { urlencoded } = require("express");
-
 const endpointsJson = require(`${__dirname}/../../endpoints.json`)
-const {fetchTopics, fetchArticleById, fetchArticles, fetchCommentsByArticleId, insertCommentByArticleId, updateVotesByArticleId, removeComment, fetchUsers} = require(`${__dirname}/../models/app.models.js`)
+const {fetchTopics, fetchArticleById, fetchArticles, fetchCommentsByArticleId, insertCommentByArticleId, updateVotesByArticleId, removeComment, fetchUsers, fetchUserByUsername} = require(`${__dirname}/../models/app.models.js`)
 const {checkTopicExists} = require(`${__dirname}/../utilities/utilities.js`)
 
 exports.getApi = (request, response) => {
@@ -80,6 +78,15 @@ exports.getUsers = (request, response, next) => {
     fetchUsers()
     .then((users) => {
         response.status(200).send({users})
+    })
+    .catch(next)
+}
+
+exports.getUserByUsername = (request, response, next) => {
+    const {username} = request.params
+    fetchUserByUsername(username)
+    .then((user) => {
+        response.status(200).send({user})
     })
     .catch(next)
 }
